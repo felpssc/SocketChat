@@ -1,3 +1,4 @@
+require("dotenv/config")
 const express = require("express");
 const path = require("path");
 
@@ -29,6 +30,6 @@ io.on("connection", socket => {
   });
 });
 
-server.listen(3999, () => {
-  console.log("🔥 Server started on port [*:3999]");
+server.listen(process.env.PORT, () => {
+  console.log(`🔥 Server started on port [*:${process.env.PORT}]`);
 });
