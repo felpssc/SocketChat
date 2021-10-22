@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>SocketChat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <form id="chat">
+      <h1 align="center">SocketChat🤪</h1>
+      <input type="text" name="username" placeholder="Digite seu username" maxlength="15" required/>
+      <div class="messages"></div>
+      <input type="text" name="message" placeholder="Digite sua mensagem" />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <script type="text/javascript">
+      const socket = io();
+
+      socket.on('previousMessages', (messages) => {
+        messages.map(msg => {
+          renderMsg(msg);
+        })
+      });
+
+      socket.on("newMessage", (data) => {
+        renderMsg(data);
+      });
+
+      const renderMsg = (msg) => {
+        const messages = document.querySelector(".messages");
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="msg"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+              margin-bottom: 10px;
+            "
+          >
+            <div class="profile-pic">
+              <img src="./emoji.png" alt="Profile"
+                style="
+                  width: 42px;
+                  height: 42px;
+                "
+              >
+            </div>
+            <div class="message-info">
+              <p>${msg.username} 
+                <span>
+                  ${msg.date.day}/${msg.date.month}/${msg.date.year} ${msg.date.hour}:${msg.date.minute}
+                </span>
+              </p>
+              <p>${msg.message}</p>
+            </div>
+          </;div>
+        `;
+        messages.appendChild(li);
+      };
+
+      const form = document.getElementById("chat");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const message = form.message.value;
+        const username = form.username.value;
+
+        const date_data = new Date()
+        
+        const date = {
+          day: date_data.getDate(),
+          month: date_data.getMonth(),
+          year: date_data.getFullYear(),
+          hour: date_data.getHours(),
+          minute: date_data.getMinutes(),
+        };
+
+        if (message && username) {
+          socket.emit("sendMessage", {
+            message,
+            username,
+            date,
+          });
+        }
+
+        renderMsg({
+          message,
+          username,
+          date,
+        });
+
+        form.message.value = "";
+        form.message.focus();
+      });
+    </script>
+  </body>
+</html>
